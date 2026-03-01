@@ -1,0 +1,344 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>디지털 시계</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .clock-display {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .time {
+            font-size: 72px;
+            font-weight: 300;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            letter-spacing: 4px;
+            margin-bottom: 15px;
+        }
+
+        .date {
+            font-size: 24px;
+            color: #e0e0e0;
+            margin-bottom: 5px;
+        }
+
+        .day {
+            font-size: 18px;
+            color: #b0b0b0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        button.active {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: #fff;
+        }
+
+        .feature-panel {
+            display: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .feature-panel.active {
+            display: block;
+        }
+
+        .alarm-section, .stopwatch-section {
+            color: #fff;
+        }
+
+        .alarm-inputs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        input[type="time"] {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 16px;
+        }
+
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+        }
+
+        .alarm-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .alarm-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stopwatch-display {
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: 300;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .stopwatch-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .delete-btn {
+            background: rgba(255, 100, 100, 0.3);
+            padding: 5px 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 100, 100, 0.5);
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 100, 100, 0.5);
+        }
+
+        @media (max-width: 600px) {
+            .time {
+                font-size: 48px;
+            }
+            .date {
+                font-size: 18px;
+            }
+            .stopwatch-display {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="clock-display">
+            <div class="time" id="time">00:00:00</div>
+            <div class="date" id="date">2024년 1월 1일</div>
+            <div class="day" id="day">월요일</div>
+        </div>
+
+        <div class="controls">
+            <button id="alarmBtn">알람</button>
+            <button id="stopwatchBtn">스탑워치</button>
+        </div>
+
+        <div class="feature-panel" id="alarmPanel">
+            <div class="alarm-section">
+                <h3 style="margin-bottom: 15px;">알람 설정</h3>
+                <div class="alarm-inputs">
+                    <input type="time" id="alarmTime">
+                    <button onclick="addAlarm()">추가</button>
+                </div>
+                <div class="alarm-list" id="alarmList"></div>
+            </div>
+        </div>
+
+        <div class="feature-panel" id="stopwatchPanel">
+            <div class="stopwatch-section">
+                <h3 style="margin-bottom: 15px;">스탑워치</h3>
+                <div class="stopwatch-display" id="stopwatchDisplay">00:00:00</div>
+                <div class="stopwatch-controls">
+                    <button onclick="startStopwatch()">시작</button>
+                    <button onclick="stopStopwatch()">정지</button>
+                    <button onclick="resetStopwatch()">초기화</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 시계 업데이트
+        function updateClock() {
+            const now = new Date();
+            
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+            
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const date = now.getDate();
+            document.getElementById('date').textContent = `${year}년 ${month}월 ${date}일`;
+            
+            const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+            document.getElementById('day').textContent = days[now.getDay()];
+            
+            checkAlarms(hours, minutes);
+        }
+
+        // 패널 전환
+        const alarmBtn = document.getElementById('alarmBtn');
+        const stopwatchBtn = document.getElementById('stopwatchBtn');
+        const alarmPanel = document.getElementById('alarmPanel');
+        const stopwatchPanel = document.getElementById('stopwatchPanel');
+
+        alarmBtn.addEventListener('click', () => {
+            alarmPanel.classList.toggle('active');
+            stopwatchPanel.classList.remove('active');
+            alarmBtn.classList.toggle('active');
+            stopwatchBtn.classList.remove('active');
+        });
+
+        stopwatchBtn.addEventListener('click', () => {
+            stopwatchPanel.classList.toggle('active');
+            alarmPanel.classList.remove('active');
+            stopwatchBtn.classList.toggle('active');
+            alarmBtn.classList.remove('active');
+        });
+
+        // 알람 기능
+        let alarms = [];
+
+        function addAlarm() {
+            const timeInput = document.getElementById('alarmTime');
+            const time = timeInput.value;
+            
+            if (time) {
+                alarms.push(time);
+                updateAlarmList();
+                timeInput.value = '';
+            }
+        }
+
+        function updateAlarmList() {
+            const list = document.getElementById('alarmList');
+            list.innerHTML = '';
+            
+            alarms.forEach((alarm, index) => {
+                const item = document.createElement('div');
+                item.className = 'alarm-item';
+                item.innerHTML = `
+                    <span>${alarm}</span>
+                    <button class="delete-btn" onclick="deleteAlarm(${index})">삭제</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function deleteAlarm(index) {
+            alarms.splice(index, 1);
+            updateAlarmList();
+        }
+
+        function checkAlarms(hours, minutes) {
+            const currentTime = `${hours}:${minutes}`;
+            alarms.forEach(alarm => {
+                if (alarm === currentTime) {
+                    alert(`알람: ${alarm}`);
+                }
+            });
+        }
+
+        // 스탑워치 기능
+        let stopwatchInterval;
+        let stopwatchTime = 0;
+        let isRunning = false;
+
+        function startStopwatch() {
+            if (!isRunning) {
+                isRunning = true;
+                stopwatchInterval = setInterval(() => {
+                    stopwatchTime++;
+                    updateStopwatchDisplay();
+                }, 1000);
+            }
+        }
+
+        function stopStopwatch() {
+            isRunning = false;
+            clearInterval(stopwatchInterval);
+        }
+
+        function resetStopwatch() {
+            stopStopwatch();
+            stopwatchTime = 0;
+            updateStopwatchDisplay();
+        }
+
+        function updateStopwatchDisplay() {
+            const hours = Math.floor(stopwatchTime / 3600);
+            const minutes = Math.floor((stopwatchTime % 3600) / 60);
+            const seconds = stopwatchTime % 60;
+            
+            document.getElementById('stopwatchDisplay').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // 초기 실행
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>
