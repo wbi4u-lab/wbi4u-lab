@@ -57,7 +57,7 @@
 <body>
     <div class="glass-panel">
         <h1>With AI For U Lab</h1>
-        <h3>환영합니다. 교실밖 바이브 코딩 실험실입니다.</h3>
+        <h3>환영합니다. AI 교실밖입니다. 무엇을 도와드릴까요?</h3>
         <div class="menu-container">
             <button class="menu-btn active" id="btn-lesson" onclick="setMode('lesson', '수업과정안 전문가')">수업과정안</button>
             <button class="menu-btn" id="btn-management" onclick="setMode('management', '학급운영 전문가')">학급운영</button>
@@ -90,7 +90,7 @@
             const chatBox = document.getElementById('chat-box');
             const msgDiv = document.createElement('div');
             msgDiv.className = 'message ai-msg';
-            msgDiv.innerHTML = '<strong>제미나이</strong><br><span class="content"></span>';
+            msgDiv.innerHTML = '<strong>교실밖</strong><br><span class="content"></span>';
             chatBox.appendChild(msgDiv);
             
             const contentSpan = msgDiv.querySelector('.content');
