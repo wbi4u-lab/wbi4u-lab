@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #ffffff; color: #333333; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        #chat-container { width: 100%; max-width: 800px; background: #ffffff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; height: 90vh; box-sizing: border-box; border: 1px solid #eaeaea; }
+        #chat-container { width: 100%; max-width: 800px; background: #ffffff; border-radius: 16px; padding: 20px 20px 30px 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; height: 90vh; box-sizing: border-box; border: 1px solid #eaeaea; }
         #chat-box { flex: 1; overflow-y: auto; background-color: #f9f9f9; border-radius: 12px; padding: 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #eeeeee; }
         .message { padding: 14px 18px; border-radius: 12px; max-width: 85%; line-height: 1.8; font-size: 16px; word-break: break-all; }
         .user-msg { align-self: flex-end; background-color: #007bff; color: white; border-bottom-right-radius: 4px; }
@@ -27,7 +27,7 @@
         .mode-selector label { font-size: 14px; background: #f4f4f4; padding: 8px 16px; border-radius: 20px; cursor: pointer; border: 1px solid #eaeaea; color: #555555; }
         .mode-selector input { display: none; }
         .mode-selector input:checked + span { color: #007bff; font-weight: 700; }
-        @media (max-width: 480px) { #chat-container { height: 95vh; padding: 15px; } }
+        @media (max-width: 480px) { #chat-container { height: 92vh; padding: 15px; } }
     </style>
 </head>
 <body>
