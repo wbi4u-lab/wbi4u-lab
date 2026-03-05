@@ -14,7 +14,6 @@
         .user-msg { align-self: flex-end; background-color: #007bff; color: white; }
         .ai-msg { align-self: flex-start; background-color: #3d3d3d; border: 1px solid #555; }
         
-        /* 모바일 최적화 입력 영역 */
         .input-area { display: flex; flex-direction: column; gap: 10px; }
         textarea { width: 100%; height: 80px; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #1a1a1a; color: white; font-size: 16px; resize: none; box-sizing: border-box; outline: none; }
         .btn-group { display: flex; gap: 8px; }
@@ -23,11 +22,11 @@
         #pdf-btn { background-color: #4A90E2; color: white; }
         
         .mode-selector { margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-        .mode-selector label { font-size: 14px; background: #3d3d3d; padding: 6px 12px; border-radius: 20px; cursor: pointer; border: 1px solid #555; }
+        .mode-selector label { font-size: 14px; background: #3d3d3d; padding: 6px 12px; border-radius: 20px; cursor: pointer; border: 1px solid #555; transition: 0.2s; }
         .mode-selector input { display: none; }
         .mode-selector input:checked + span { color: #007bff; font-weight: bold; }
+        .mode-selector label:has(input:checked) { border-color: #007bff; background: #2a2a2a; }
 
-        /* 모바일 전용 반응형 쿼리 */
         @media (max-width: 480px) {
             body { padding: 5px; }
             #chat-container { height: 95vh; padding: 10px; }
@@ -50,7 +49,7 @@
         <div id="chat-box"></div>
 
         <div class="input-area">
-            <textarea id="user-input" placeholder="어떤 도움을 드릴까요?"></textarea>
+            <textarea id="user-input" placeholder="질문을 입력하세요... (Enter로 전송, Shift+Enter로 줄바꿈)" onkeydown="handleKeyPress(event)"></textarea>
             <div class="btn-group">
                 <button id="send-btn" onclick="ask()">전송</button>
                 <button id="pdf-btn" onclick="saveAsPDF()">저장(PDF)</button>
@@ -59,6 +58,14 @@
     </div>
 
     <script>
+        // PC 사용자를 위한 키보드 이벤트 처리
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault(); // 기본 줄바꿈 방지
+                ask(); // 전송 함수 호출
+            }
+        }
+
         function appendMessage(sender, message, className) {
             const chatBox = document.getElementById('chat-box');
             const msgDiv = document.createElement('div');
@@ -91,7 +98,7 @@
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                contentSpan.innerHTML = ''; // 초기화
+                contentSpan.innerHTML = ''; 
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -107,7 +114,7 @@
         async function saveAsPDF() {
             const { jsPDF } = window.jspdf;
             const chatBox = document.getElementById('chat-box');
-            if (!chatBox.hasChildNodes()) { alert("저장할 내용이 없습니다."); return; }
+            if (!chatBox || !chatBox.hasChildNodes()) { alert("저장할 내용이 없습니다."); return; }
             try {
                 const canvas = await html2canvas(chatBox, { scale: 2, useCORS: true, backgroundColor: "#1a1a1a" });
                 const imgData = canvas.toDataURL('image/png');
