@@ -7,44 +7,32 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* 1) 세련된 화이트 톤 디자인 및 폰트 설정 */
         body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #ffffff; color: #333333; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        
         #chat-container { width: 100%; max-width: 800px; background: #ffffff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; height: 90vh; box-sizing: border-box; border: 1px solid #eaeaea; }
-        
-        /* 1) 글이 놓이는 공간: 옅은 회색 */
         #chat-box { flex: 1; overflow-y: auto; background-color: #f9f9f9; border-radius: 12px; padding: 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #eeeeee; }
-        
         .message { padding: 14px 18px; border-radius: 12px; max-width: 85%; line-height: 1.8; font-size: 16px; word-break: break-all; }
         .user-msg { align-self: flex-end; background-color: #007bff; color: white; border-bottom-right-radius: 4px; }
         .ai-msg { align-self: flex-start; background-color: #ffffff; color: #333333; border: 1px solid #eaeaea; border-bottom-left-radius: 4px; }
-        
         .sender-name { font-weight: 700; font-size: 14px; color: #888888; margin-bottom: 8px; display: block; }
         .ai-msg .sender-name { color: #007bff; }
         .user-msg .sender-name { color: #ffffff; opacity: 0.8; }
-
         .welcome-text { text-align: center; color: #666666; font-size: 15px; margin-bottom: 20px; font-weight: 500; }
-
         .input-area { display: flex; flex-direction: column; gap: 12px; }
         textarea { width: 100%; height: 90px; padding: 16px; border-radius: 12px; border: 1px solid #eaeaea; background: #ffffff; color: #333333; font-size: 16px; resize: none; box-sizing: border-box; outline: none; font-family: inherit; }
-        
         .btn-group { display: flex; gap: 10px; }
         button { flex: 1; padding: 16px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 16px; transition: 0.2s; font-family: inherit; }
         #send-btn { background-color: #007bff; color: white; }
         #pdf-btn { background-color: #f4f4f4; color: #555555; border: 1px solid #eaeaea; }
-        
         .mode-selector { margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
         .mode-selector label { font-size: 14px; background: #f4f4f4; padding: 8px 16px; border-radius: 20px; cursor: pointer; border: 1px solid #eaeaea; color: #555555; }
         .mode-selector input { display: none; }
         .mode-selector input:checked + span { color: #007bff; font-weight: 700; }
-
         @media (max-width: 480px) { #chat-container { height: 95vh; padding: 15px; } }
     </style>
 </head>
 <body>
     <h3 style="margin: 20px 0 5px 0; color: #1a1a1a; font-weight: 800;">With AI For U Lab</h3>
     <div class="welcome-text">환영합니다. AI 교실밖입니다. 무엇을 도와드릴까요?</div>
-
     <div id="chat-container">
         <div class="mode-selector">
             <label><input type="radio" name="mode" value="lesson" checked><span>수업과정안</span></label>
@@ -52,9 +40,7 @@
             <label><input type="radio" name="mode" value="rights"><span>교권상담</span></label>
             <label><input type="radio" name="mode" value="ai_edu"><span>AI활용</span></label>
         </div>
-
         <div id="chat-box"></div>
-
         <div class="input-area">
             <textarea id="user-input" placeholder="어떤 도움을 드릴까요? (Enter로 전송)"></textarea>
             <div class="btn-group">
@@ -63,9 +49,7 @@
             </div>
         </div>
     </div>
-
     <script>
-        // 메시지 추가 함수 (줄바꿈 지원)
         function appendMessage(sender, message, className) {
             const chatBox = document.getElementById('chat-box');
             const msgDiv = document.createElement('div');
@@ -76,88 +60,55 @@
             chatBox.scrollTop = chatBox.scrollHeight;
             return msgDiv;
         }
-
         async function ask() {
             const input = document.getElementById('user-input');
             const message = input.value.trim();
             const mode = document.querySelector('input[name="mode"]:checked').value;
             if (!message) return;
-
             appendMessage('User', message.replace(/\n/g, '<br>'), 'user-msg');
             input.value = '';
-
             const aiMsgDiv = appendMessage('AI', '생각 중...', 'ai-msg');
             const contentSpan = aiMsgDiv.querySelector('.content');
-
             try {
                 const response = await fetch('/ask', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message, mode })
                 });
-
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let fullText = ""; 
                 contentSpan.innerHTML = ""; 
-
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-                    
-                    const chunk = decoder.decode(value, { stream: true });
-                    fullText += chunk;
-                    
-                    // 핵심: 가독성 높이는 실시간 줄바꿈 변환
+                    fullText += decoder.decode(value, { stream: true });
                     contentSpan.innerHTML = fullText.replace(/\n/g, '<br>');
                     document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
                 }
-            } catch (error) {
-                contentSpan.innerText = "오류 발생: " + error;
-            }
+            } catch (error) { contentSpan.innerText = "오류 발생: " + error; }
         }
-
-        // 2) 내용 전체 갈무리 PDF 저장
         async function saveAsPDF() {
             const { jsPDF } = window.jspdf;
             const chatBox = document.getElementById('chat-box');
             if (!chatBox.hasChildNodes()) return;
-            
             const pdfBtn = document.getElementById('pdf-btn');
             pdfBtn.innerText = "처리 중...";
-            pdfBtn.disabled = true;
-
             try {
                 const originalStyle = chatBox.style.cssText;
-                // 전체 길이를 담기 위해 스타일 임시 변경
                 chatBox.style.cssText = "height: auto; overflow: visible; width: 800px; background-color: #f9f9f9; padding: 20px;";
-                
-                const canvas = await html2canvas(chatBox, { 
-                    scale: 2, 
-                    useCORS: true, 
-                    backgroundColor: "#f9f9f9",
-                    windowWidth: 800,
-                    windowHeight: chatBox.scrollHeight
-                });
-                
+                const canvas = await html2canvas(chatBox, { scale: 2, useCORS: true, backgroundColor: "#f9f9f9" });
                 chatBox.style.cssText = originalStyle;
-                
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const imgProps = pdf.getImageProperties(imgData);
                 const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                
                 pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight);
                 pdf.save(`교실밖_상담기록_${new Date().toISOString().slice(0,10)}.pdf`);
             } catch (e) { alert("저장 실패"); }
-            finally { 
-                pdfBtn.innerText = "저장(PDF)"; 
-                pdfBtn.disabled = false;
-            }
+            finally { pdfBtn.innerText = "저장(PDF)"; }
         }
-
-        // 엔터 키 이벤트
         document.getElementById('user-input').addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey && window.innerWidth > 480) {
                 e.preventDefault();
