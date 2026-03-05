@@ -42,7 +42,7 @@
         </div>
         <div id="chat-box"></div>
         <div class="input-area">
-            <textarea id="user-input" placeholder="어떤 도움을 드릴까요? (Enter로 전송)" onkeydown="handleKeyPress(event)"></textarea>
+            <textarea id="user-input" placeholder="어떤 도움을 드릴까요? (Enter로 전송)"></textarea>
             <div class="btn-group">
                 <button id="send-btn" onclick="ask()">전송</button>
                 <button id="pdf-btn" onclick="saveAsPDF()">저장(PDF)</button>
@@ -51,12 +51,14 @@
     </div>
 
     <script>
-        function handleKeyPress(event) {
+        // 전송 이벤트 리스너 통합 (가장 안정적인 방식)
+        const userInput = document.getElementById('user-input');
+        userInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter' && !event.shiftKey && window.innerWidth > 480) {
                 event.preventDefault();
                 ask();
             }
-        }
+        });
 
         function appendMessage(sender, message, className) {
             const chatBox = document.getElementById('chat-box');
@@ -75,12 +77,13 @@
             const mode = document.querySelector('input[name="mode"]:checked').value;
             if (!message) return;
 
+            // 1. 사용자 메시지 추가
             appendMessage('User', message.replace(/\n/g, '<br>'), 'user-msg');
             input.value = '';
 
-            const aiMsgDiv = appendMessage('AI', '', 'ai-msg');
+            // 2. 답변 영역 생성
+            const aiMsgDiv = appendMessage('AI', '생각 중...', 'ai-msg');
             const contentSpan = aiMsgDiv.querySelector('.content');
-            let fullText = ""; // 전체 텍스트를 담을 변수
 
             try {
                 const response = await fetch('/ask', {
@@ -91,6 +94,8 @@
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
+                let fullText = ""; 
+                contentSpan.innerHTML = ""; // "생각 중..." 문구 제거
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -99,7 +104,7 @@
                     const chunk = decoder.decode(value, { stream: true });
                     fullText += chunk;
                     
-                    // 핵심: 실시간으로 줄바꿈(\n)을 <br> 태그로 변환하여 출력
+                    // 줄바꿈 기호를 HTML 태그로 실시간 변환
                     contentSpan.innerHTML = fullText.replace(/\n/g, '<br>');
                     document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
                 }
@@ -111,10 +116,32 @@
         async function saveAsPDF() {
             const { jsPDF } = window.jspdf;
             const chatBox = document.getElementById('chat-box');
-            if (!chatBox.hasChildNodes()) return;
+            if (!chatBox.hasChildNodes()) { alert("내용이 없습니다."); return; }
+            
             const pdfBtn = document.getElementById('pdf-btn');
-            pdfBtn.innerText = "처리 중...";
+            pdfBtn.innerText = "저장 중...";
+            pdfBtn.disabled = true;
+
             try {
                 const originalStyle = chatBox.style.cssText;
                 chatBox.style.cssText = "height: auto; overflow: visible; width: 800px; background-color: #f9f9f9; padding: 20px;";
-                const canvas = await html
+                const canvas = await html2canvas(chatBox, { scale: 2, useCORS: true, backgroundColor: "#f9f9f9" });
+                chatBox.style.cssText = originalStyle;
+                
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const imgProps = pdf.getImageProperties(imgData);
+                const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight);
+                pdf.save(`교실밖_상담기록_${new Date().toISOString().slice(0,10)}.pdf`);
+            } catch (e) { alert("저장 실패"); }
+            finally { 
+                pdfBtn.innerText = "저장(PDF)"; 
+                pdfBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
