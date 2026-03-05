@@ -76,7 +76,7 @@
             currentMode = mode;
             document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`btn-${mode}`).classList.add('active');
-            appendMessage('시스템', `[${modeName}] 모드로 전환되었습니다. 무엇을 도와드릴까요?`, 'ai-msg');
+            appendMessage('교실밖', `[${modeName}] 모드로 전환되었습니다. 무엇을 도와드릴까요?`, 'ai-msg');
         }
         
         async function sendMessage() {
