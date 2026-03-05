@@ -2,46 +2,58 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>With AI For U Lab - 교실밖</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #1a1a1a; color: #e0e0e0; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        #chat-container { width: 100%; max-width: 800px; background: #2d2d2d; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        #chat-box { height: 500px; overflow-y: auto; border-bottom: 1px solid #444; padding-bottom: 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .message { padding: 12px; border-radius: 8px; max-width: 85%; line-height: 1.6; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #1a1a1a; color: #e0e0e0; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        #chat-container { width: 100%; max-width: 800px; background: #2d2d2d; border-radius: 12px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; flex-direction: column; height: 90vh; box-sizing: border-box; }
+        #chat-box { flex: 1; overflow-y: auto; border-bottom: 1px solid #444; padding-bottom: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .message { padding: 12px; border-radius: 8px; max-width: 90%; line-height: 1.6; font-size: 15px; word-break: break-all; }
         .user-msg { align-self: flex-end; background-color: #007bff; color: white; }
         .ai-msg { align-self: flex-start; background-color: #3d3d3d; border: 1px solid #555; }
-        .btn-group { display: flex; gap: 10px; }
-        input[type="text"] { flex: 1; padding: 12px; border-radius: 5px; border: 1px solid #444; background: #1a1a1a; color: white; }
-        button { padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        #send-btn { background-color: #007bff; color: white; flex: 2; }
-        #pdf-btn { background-color: #4A90E2; color: white; flex: 1; }
-        button:hover { opacity: 0.8; }
-        .mode-selector { margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap; }
+        
+        /* 모바일 최적화 입력 영역 */
+        .input-area { display: flex; flex-direction: column; gap: 10px; }
+        textarea { width: 100%; height: 80px; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #1a1a1a; color: white; font-size: 16px; resize: none; box-sizing: border-box; outline: none; }
+        .btn-group { display: flex; gap: 8px; }
+        button { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.3s; }
+        #send-btn { background-color: #007bff; color: white; }
+        #pdf-btn { background-color: #4A90E2; color: white; }
+        
+        .mode-selector { margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        .mode-selector label { font-size: 14px; background: #3d3d3d; padding: 6px 12px; border-radius: 20px; cursor: pointer; border: 1px solid #555; }
+        .mode-selector input { display: none; }
+        .mode-selector input:checked + span { color: #007bff; font-weight: bold; }
+
+        /* 모바일 전용 반응형 쿼리 */
+        @media (max-width: 480px) {
+            body { padding: 5px; }
+            #chat-container { height: 95vh; padding: 10px; }
+            .message { max-width: 95%; font-size: 14px; }
+            textarea { height: 70px; font-size: 14px; }
+            button { padding: 12px; font-size: 14px; }
+        }
     </style>
 </head>
 <body>
-    <h2>With AI For U Lab</h2>
-    <p>환영합니다. AI 교실밖입니다. 무엇을 도와드릴까요?</p>
-
+    <h3 style="margin: 10px 0;">With AI For U Lab</h3>
     <div id="chat-container">
         <div class="mode-selector">
-            <label><input type="radio" name="mode" value="lesson" checked> 수업과정안</label>
-            <label><input type="radio" name="mode" value="management"> 학급운영</label>
-            <label><input type="radio" name="mode" value="rights"> 교권상담</label>
-            <label><input type="radio" name="mode" value="ai_edu"> AI활용</label>
+            <label><input type="radio" name="mode" value="lesson" checked><span>수업과정안</span></label>
+            <label><input type="radio" name="mode" value="management"><span>학급운영</span></label>
+            <label><input type="radio" name="mode" value="rights"><span>교권상담</span></label>
+            <label><input type="radio" name="mode" value="ai_edu"><span>AI활용</span></label>
         </div>
 
-        <div id="chat-box">
-            </div>
+        <div id="chat-box"></div>
 
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-            <input type="text" id="user-input" placeholder="질문을 입력하세요..." onkeypress="if(event.keyCode==13) ask()">
+        <div class="input-area">
+            <textarea id="user-input" placeholder="전문적인 지문을 입력하세요..."></textarea>
             <div class="btn-group">
                 <button id="send-btn" onclick="ask()">전송</button>
-                <button id="pdf-btn" onclick="saveAsPDF()">대화 저장(PDF)</button>
+                <button id="pdf-btn" onclick="saveAsPDF()">저장(PDF)</button>
             </div>
         </div>
     </div>
@@ -51,7 +63,6 @@
             const chatBox = document.getElementById('chat-box');
             const msgDiv = document.createElement('div');
             msgDiv.className = 'message ' + className;
-            // 답변자일 때만 '교실밖'으로 표시, 질문자는 '나'로 표시
             const displayName = (sender === 'AI') ? '교실밖' : '나';
             msgDiv.innerHTML = `<strong>${displayName}</strong><br><span class="content">${message}</span>`;
             chatBox.appendChild(msgDiv);
@@ -68,7 +79,7 @@
             appendMessage('User', message.replace(/\n/g, '<br>'), 'user-msg');
             input.value = '';
 
-            const aiMsgDiv = appendMessage('AI', '', 'ai-msg');
+            const aiMsgDiv = appendMessage('AI', '생각 중...', 'ai-msg');
             const contentSpan = aiMsgDiv.querySelector('.content');
 
             try {
@@ -80,11 +91,13 @@
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
+                contentSpan.innerHTML = ''; // 초기화
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
                     contentSpan.innerHTML += decoder.decode(value, { stream: true });
+                    document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
                 }
             } catch (error) {
                 contentSpan.innerText = "오류가 발생했습니다: " + error;
@@ -94,21 +107,18 @@
         async function saveAsPDF() {
             const { jsPDF } = window.jspdf;
             const chatBox = document.getElementById('chat-box');
-            
-            if (!chatBox.hasChildNodes()) {
-                alert("저장할 대화 내용이 없습니다.");
-                return;
-            }
-
+            if (!chatBox.hasChildNodes()) { alert("저장할 내용이 없습니다."); return; }
             try {
-                const canvas = await html2canvas(chatBox, {
-                    scale: 2,
-                    useCORS: true,
-                    backgroundColor: "#1a1a1a" // 다크모드 배경 유지
-                });
-                
+                const canvas = await html2canvas(chatBox, { scale: 2, useCORS: true, backgroundColor: "#1a1a1a" });
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const imgProps = pdf.getImageProperties(imgData);
-                const pdfHeight = (imgProps.height * pdfWidth) / img
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`교실밖_상담기록_${new Date().toISOString().slice(0,10)}.pdf`);
+            } catch (error) { alert("PDF 생성 중 오류가 발생했습니다."); }
+        }
+    </script>
+</body>
+</html>
