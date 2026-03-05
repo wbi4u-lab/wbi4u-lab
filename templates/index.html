@@ -84,7 +84,7 @@
             const message = inputField.value.trim();
             if (!message) return;
             
-            appendMessage('교실밖', message.replace(/\n/g, '<br>'), 'user-msg');
+            appendMessage('User', message.replace(/\n/g, '<br>'), 'user-msg');
             inputField.value = '';
             
             const chatBox = document.getElementById('chat-box');
