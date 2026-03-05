@@ -8,50 +8,31 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #ffffff; color: #333333; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        
         #chat-container { width: 100%; max-width: 800px; background: #ffffff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; height: 90vh; box-sizing: border-box; border: 1px solid #eaeaea; }
-        
         #chat-box { flex: 1; overflow-y: auto; background-color: #f9f9f9; border-radius: 12px; padding: 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #eeeeee; }
-        
-        .message { padding: 14px 18px; border-radius: 12px; max-width: 85%; line-height: 1.7; font-size: 16px; word-break: break-all; }
+        .message { padding: 14px 18px; border-radius: 12px; max-width: 85%; line-height: 1.8; font-size: 16px; word-break: break-all; }
         .user-msg { align-self: flex-end; background-color: #007bff; color: white; border-bottom-right-radius: 4px; }
         .ai-msg { align-self: flex-start; background-color: #ffffff; color: #333333; border: 1px solid #eaeaea; border-bottom-left-radius: 4px; }
-        
-        .sender-name { font-weight: 700; font-size: 14px; color: #888888; margin-bottom: 5px; display: block; }
-        .user-msg .sender-name { color: #ffffff; opacity: 0.8; }
+        .sender-name { font-weight: 700; font-size: 14px; color: #888888; margin-bottom: 8px; display: block; }
         .ai-msg .sender-name { color: #007bff; }
-
+        .user-msg .sender-name { color: #ffffff; opacity: 0.8; }
         .input-area { display: flex; flex-direction: column; gap: 12px; }
-        textarea { width: 100%; height: 90px; padding: 16px; border-radius: 12px; border: 1px solid #eaeaea; background: #ffffff; color: #333333; font-size: 16px; resize: none; box-sizing: border-box; outline: none; transition: border-color 0.2s; font-family: inherit; }
-        textarea:focus { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
-        
+        textarea { width: 100%; height: 90px; padding: 16px; border-radius: 12px; border: 1px solid #eaeaea; background: #ffffff; color: #333333; font-size: 16px; resize: none; box-sizing: border-box; outline: none; font-family: inherit; }
         .btn-group { display: flex; gap: 10px; }
-        button { flex: 1; padding: 16px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 16px; transition: background-color 0.2s, transform 0.1s; font-family: inherit; }
-        
+        button { flex: 1; padding: 16px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 16px; font-family: inherit; transition: 0.2s; }
         #send-btn { background-color: #007bff; color: white; }
         #pdf-btn { background-color: #f4f4f4; color: #555555; border: 1px solid #eaeaea; }
-        
         .mode-selector { margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
         .mode-selector label { font-size: 14px; background: #f4f4f4; padding: 8px 16px; border-radius: 20px; cursor: pointer; border: 1px solid #eaeaea; color: #555555; }
         .mode-selector input { display: none; }
         .mode-selector input:checked + span { color: #007bff; font-weight: 700; }
-        .mode-selector label:has(input:checked) { border-color: #007bff; background: rgba(0,123,255,0.05); }
-
-        /* 세련된 환영 문구 스타일 */
-        .welcome-text { text-align: center; color: #666666; font-size: 15px; margin-bottom: 20px; line-height: 1.5; font-weight: 500; }
-
-        @media (max-width: 480px) {
-            #chat-container { height: 95vh; }
-            textarea { height: 80px; }
-        }
+        .welcome-text { text-align: center; color: #666666; font-size: 15px; margin-bottom: 20px; font-weight: 500; }
+        @media (max-width: 480px) { #chat-container { height: 95vh; } }
     </style>
 </head>
 <body>
-    <h3 style="margin: 20px 0 5px 0; color: #1a1a1a; font-weight: 800; letter-spacing: -0.5px;">With AI For U Lab</h3>
-    <div class="welcome-text">
-        환영합니다. AI 교실밖입니다. 무엇을 도와드릴까요?
-    </div>
-
+    <h3 style="margin: 20px 0 5px 0; color: #1a1a1a; font-weight: 800;">With AI For U Lab</h3>
+    <div class="welcome-text">환영합니다. AI 교실밖입니다. 무엇을 도와드릴까요?</div>
     <div id="chat-container">
         <div class="mode-selector">
             <label><input type="radio" name="mode" value="lesson" checked><span>수업과정안</span></label>
@@ -59,9 +40,7 @@
             <label><input type="radio" name="mode" value="rights"><span>교권상담</span></label>
             <label><input type="radio" name="mode" value="ai_edu"><span>AI활용</span></label>
         </div>
-
         <div id="chat-box"></div>
-
         <div class="input-area">
             <textarea id="user-input" placeholder="어떤 도움을 드릴까요? (Enter로 전송)" onkeydown="handleKeyPress(event)"></textarea>
             <div class="btn-group">
@@ -73,11 +52,9 @@
 
     <script>
         function handleKeyPress(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                if (window.innerWidth > 480) {
-                    event.preventDefault();
-                    ask();
-                }
+            if (event.key === 'Enter' && !event.shiftKey && window.innerWidth > 480) {
+                event.preventDefault();
+                ask();
             }
         }
 
@@ -101,8 +78,9 @@
             appendMessage('User', message.replace(/\n/g, '<br>'), 'user-msg');
             input.value = '';
 
-            const aiMsgDiv = appendMessage('AI', '생각 중...', 'ai-msg');
+            const aiMsgDiv = appendMessage('AI', '', 'ai-msg');
             const contentSpan = aiMsgDiv.querySelector('.content');
+            let fullText = ""; // 전체 텍스트를 담을 변수
 
             try {
                 const response = await fetch('/ask', {
@@ -113,70 +91,30 @@
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                contentSpan.innerHTML = '';
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-                    contentSpan.innerHTML += decoder.decode(value, { stream: true });
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    fullText += chunk;
+                    
+                    // 핵심: 실시간으로 줄바꿈(\n)을 <br> 태그로 변환하여 출력
+                    contentSpan.innerHTML = fullText.replace(/\n/g, '<br>');
                     document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
                 }
             } catch (error) {
-                contentSpan.innerText = "오류가 발생했습니다: " + error;
+                contentSpan.innerText = "오류 발생: " + error;
             }
         }
 
         async function saveAsPDF() {
             const { jsPDF } = window.jspdf;
             const chatBox = document.getElementById('chat-box');
-            if (!chatBox || !chatBox.hasChildNodes()) { alert("저장할 내용이 없습니다."); return; }
-
+            if (!chatBox.hasChildNodes()) return;
             const pdfBtn = document.getElementById('pdf-btn');
-            pdfBtn.innerText = "다운로드 중...";
-            pdfBtn.disabled = true;
-
+            pdfBtn.innerText = "처리 중...";
             try {
                 const originalStyle = chatBox.style.cssText;
                 chatBox.style.cssText = "height: auto; overflow: visible; width: 800px; background-color: #f9f9f9; padding: 20px;";
-                
-                const canvas = await html2canvas(chatBox, {
-                    scale: 2,
-                    useCORS: true,
-                    backgroundColor: "#f9f9f9",
-                    windowWidth: 800,
-                    windowHeight: chatBox.scrollHeight
-                });
-
-                chatBox.style.cssText = originalStyle;
-                
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-                const imgProps = pdf.getImageProperties(imgData);
-                const imgHeightInMm = (imgProps.height * pdfWidth) / imgProps.width;
-                
-                let heightLeft = imgHeightInMm;
-                let position = 0;
-
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeightInMm);
-                heightLeft -= pdfHeight;
-
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeightInMm;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeightInMm);
-                    heightLeft -= pdfHeight;
-                }
-                
-                pdf.save(`교실밖_상담기록_${new Date().toISOString().slice(0,10)}.pdf`);
-            } catch (error) {
-                alert("PDF 생성 중 오류가 발생했습니다.");
-            } finally {
-                pdfBtn.innerText = "저장(PDF)";
-                pdfBtn.disabled = false;
-            }
-        }
-    </script>
-</body>
-</html>
+                const canvas = await html
