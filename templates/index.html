@@ -86,8 +86,20 @@
                     contentSpan.innerHTML = fullText.replace(/\n/g, '<br>');
                     document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
                 }
-            } catch (error) { contentSpan.innerText = "오류 발생: " + error; }
-        }
+          } catch (error) {
+    // 429 에러(Quota Exceeded)인 경우를 특정하여 안내
+    if (error.toString().includes("429")) {
+        contentSpan.innerHTML = `
+            <div style="color: #666; border-left: 3px solid #007bff; padding-left: 15px; margin-top: 10px;">
+                현재 많은 분이 대화를 나누고 계셔 잠시 정체가 발생했습니다.<br>
+                <strong>약 1분 뒤에 다시 질문을 해주시겠습니까?</strong><br>
+                <small style="display: block; margin-top: 5px; color: #999;">(구글 API 할당량 초과로 인한 일시적 현상입니다.)</small>
+            </div>`;
+    } else {
+        contentSpan.innerText = "통신 중 예기치 못한 상황이 발생했습니다. 잠시 후 다시 시도해 주세요.";
+    }
+    } 
+            
         async function saveAsPDF() {
             const { jsPDF } = window.jspdf;
             const chatBox = document.getElementById('chat-box');
