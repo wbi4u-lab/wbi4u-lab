@@ -7,15 +7,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* 1) 화이트 톤의 세련된 디자인 및 폰트 적용 */
         body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #ffffff; color: #333333; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         
         #chat-container { width: 100%; max-width: 800px; background: #ffffff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; height: 90vh; box-sizing: border-box; border: 1px solid #eaeaea; }
         
-        /* 1) 글이 놓이는 공간을 옅은 회색으로 변경 */
         #chat-box { flex: 1; overflow-y: auto; background-color: #f9f9f9; border-radius: 12px; padding: 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #eeeeee; }
         
-        .message { padding: 14px 18px; border-radius: 12px; max-width: 85%; line-height: 1.7; font-size: 16px; word-break: break-all; position: relative; }
+        .message { padding: 14px 18px; border-radius: 12px; max-width: 85%; line-height: 1.7; font-size: 16px; word-break: break-all; }
         .user-msg { align-self: flex-end; background-color: #007bff; color: white; border-bottom-right-radius: 4px; }
         .ai-msg { align-self: flex-start; background-color: #ffffff; color: #333333; border: 1px solid #eaeaea; border-bottom-left-radius: 4px; }
         
@@ -29,33 +27,31 @@
         
         .btn-group { display: flex; gap: 10px; }
         button { flex: 1; padding: 16px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 16px; transition: background-color 0.2s, transform 0.1s; font-family: inherit; }
-        button:active { transform: translateY(1px); }
         
         #send-btn { background-color: #007bff; color: white; }
-        #send-btn:hover { background-color: #0069d9; }
         #pdf-btn { background-color: #f4f4f4; color: #555555; border: 1px solid #eaeaea; }
-        #pdf-btn:hover { background-color: #eaeaea; }
         
         .mode-selector { margin-bottom: 15px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-        .mode-selector label { font-size: 14px; background: #f4f4f4; padding: 8px 16px; border-radius: 20px; cursor: pointer; border: 1px solid #eaeaea; transition: 0.2s; color: #555555; }
+        .mode-selector label { font-size: 14px; background: #f4f4f4; padding: 8px 16px; border-radius: 20px; cursor: pointer; border: 1px solid #eaeaea; color: #555555; }
         .mode-selector input { display: none; }
         .mode-selector input:checked + span { color: #007bff; font-weight: 700; }
         .mode-selector label:has(input:checked) { border-color: #007bff; background: rgba(0,123,255,0.05); }
 
-        /* 모바일 전용 반응형 쿼리 */
+        /* 세련된 환영 문구 스타일 */
+        .welcome-text { text-align: center; color: #666666; font-size: 15px; margin-bottom: 20px; line-height: 1.5; font-weight: 500; }
+
         @media (max-width: 480px) {
-            body { padding: 5px; }
-            #chat-container { height: 95vh; padding: 15px; border-radius: 12px; }
-            #chat-box { padding: 15px; gap: 12px; }
-            .message { max-width: 90%; font-size: 15px; padding: 12px 16px; }
-            textarea { height: 80px; font-size: 15px; padding: 12px; }
-            button { padding: 14px; font-size: 15px; border-radius: 10px; }
-            .mode-selector label { padding: 6px 12px; font-size: 13px; }
+            #chat-container { height: 95vh; }
+            textarea { height: 80px; }
         }
     </style>
 </head>
 <body>
-    <h3 style="margin: 15px 0 10px 0; color: #1a1a1a; font-weight: 800;">With AI For U Lab</h3>
+    <h3 style="margin: 20px 0 5px 0; color: #1a1a1a; font-weight: 800; letter-spacing: -0.5px;">With AI For U Lab</h3>
+    <div class="welcome-text">
+        환영합니다. AI 교실밖입니다. 무엇을 도와드릴까요?
+    </div>
+
     <div id="chat-container">
         <div class="mode-selector">
             <label><input type="radio" name="mode" value="lesson" checked><span>수업과정안</span></label>
@@ -64,11 +60,10 @@
             <label><input type="radio" name="mode" value="ai_edu"><span>AI활용</span></label>
         </div>
 
-        <div id="chat-box">
-            </div>
+        <div id="chat-box"></div>
 
         <div class="input-area">
-            <textarea id="user-input" placeholder="전문적인 질문을 입력하세요... (Enter로 전송, Shift+Enter 줄바꿈)" onkeydown="handleKeyPress(event)"></textarea>
+            <textarea id="user-input" placeholder="어떤 도움을 드릴까요? (Enter로 전송)" onkeydown="handleKeyPress(event)"></textarea>
             <div class="btn-group">
                 <button id="send-btn" onclick="ask()">전송</button>
                 <button id="pdf-btn" onclick="saveAsPDF()">저장(PDF)</button>
@@ -77,12 +72,11 @@
     </div>
 
     <script>
-        // PC 사용자를 위한 키보드 이벤트 처리 (Enter 전송, Shift+Enter 줄바꿈)
         function handleKeyPress(event) {
             if (event.key === 'Enter' && !event.shiftKey) {
-                if (window.innerWidth > 480) { // 모바일에선 엔터로 줄바꿈 허용
-                    event.preventDefault(); // 기본 줄바꿈 방지
-                    ask(); // 전송 함수 호출
+                if (window.innerWidth > 480) {
+                    event.preventDefault();
+                    ask();
                 }
             }
         }
@@ -106,7 +100,6 @@
 
             appendMessage('User', message.replace(/\n/g, '<br>'), 'user-msg');
             input.value = '';
-            input.style.height = '90px'; // 높이 초기화
 
             const aiMsgDiv = appendMessage('AI', '생각 중...', 'ai-msg');
             const contentSpan = aiMsgDiv.querySelector('.content');
@@ -120,7 +113,7 @@
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
-                contentSpan.innerHTML = ''; // 초기화
+                contentSpan.innerHTML = '';
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -133,67 +126,54 @@
             }
         }
 
-        // 2) 스크린샷이 아닌 내용 전체를 갈무리하는 PDF 저장 기능
         async function saveAsPDF() {
             const { jsPDF } = window.jspdf;
             const chatBox = document.getElementById('chat-box');
             if (!chatBox || !chatBox.hasChildNodes()) { alert("저장할 내용이 없습니다."); return; }
 
-            // 로딩 표시
             const pdfBtn = document.getElementById('pdf-btn');
-            const originalText = pdfBtn.innerText;
             pdfBtn.innerText = "다운로드 중...";
             pdfBtn.disabled = true;
 
             try {
-                // PDF 생성을 위해 임시로 스타일 변경 (스크롤 없애고 전체 너비 확보)
                 const originalStyle = chatBox.style.cssText;
-                chatBox.style.cssText = "height: auto; overflow: visible; width: 800px; background-color: #f9f9f9; padding: 20px; border-radius: 0;";
+                chatBox.style.cssText = "height: auto; overflow: visible; width: 800px; background-color: #f9f9f9; padding: 20px;";
                 
                 const canvas = await html2canvas(chatBox, {
-                    scale: 2, // 화질 향상
+                    scale: 2,
                     useCORS: true,
-                    backgroundColor: "#f9f9f9", // 글이 놓이는 공간 색상 유지
+                    backgroundColor: "#f9f9f9",
                     windowWidth: 800,
                     windowHeight: chatBox.scrollHeight
                 });
 
-                // 원래 스타일로 복구
                 chatBox.style.cssText = originalStyle;
                 
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = pdf.internal.pageSize.getHeight();
-                
                 const imgProps = pdf.getImageProperties(imgData);
                 const imgHeightInMm = (imgProps.height * pdfWidth) / imgProps.width;
                 
-                // 여러 페이지에 걸쳐 저장하는 로직
                 let heightLeft = imgHeightInMm;
                 let position = 0;
-                let pageCounter = 1;
 
-                // 첫 페이지 추가
                 pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeightInMm);
                 heightLeft -= pdfHeight;
 
-                // 내용이 많으면 다음 페이지 추가
                 while (heightLeft >= 0) {
                     position = heightLeft - imgHeightInMm;
                     pdf.addPage();
                     pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeightInMm);
                     heightLeft -= pdfHeight;
-                    pageCounter++;
                 }
                 
                 pdf.save(`교실밖_상담기록_${new Date().toISOString().slice(0,10)}.pdf`);
             } catch (error) {
-                console.error("PDF 생성 중 오류:", error);
                 alert("PDF 생성 중 오류가 발생했습니다.");
             } finally {
-                // 버튼 상태 복구
-                pdfBtn.innerText = originalText;
+                pdfBtn.innerText = "저장(PDF)";
                 pdfBtn.disabled = false;
             }
         }
