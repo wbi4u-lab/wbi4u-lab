@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <meta charset="UTF-8">
     <title>With AI For U Lab</title>
     <style>
@@ -68,6 +70,9 @@
         <div id="input-area">
             <textarea id="user-input" placeholder="질문을 입력하세요... (Shift + Enter로 줄바꿈)" onkeydown="handleEnter(event)"></textarea>
             <button id="send-btn" onclick="sendMessage()">전송</button>
+            <button onclick="saveAsPDF()" id="pdf-btn" style="padding: 10px; background-color: #4A90E2; color: white; border: none; border-radius: 5px; cursor: pointer;">
+    대화 기록 저장(PDF)
+</button>
         </div>
     </div>
     <script>
@@ -135,5 +140,25 @@
             }
         }
     </script>
+async function saveAsPDF() {
+    const { jsPDF } = window.jspdf;
+    const chatBox = document.getElementById('chat-box'); // 채팅창 ID 확인 필수
+    
+    // PDF 생성을 위해 잠시 배경색 등을 조정할 수 있음
+    const canvas = await html2canvas(chatBox, {
+        scale: 2, // 화질 향상
+        useCORS: true
+    });
+    
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`교실밖_상담기록_${new Date().toLocaleDateString()}.pdf`);
+}
+    
 </body>
 </html>
