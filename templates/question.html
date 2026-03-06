@@ -1,0 +1,40 @@
+<div id="container" style="max-width: 600px; margin: auto; padding: 20px;">
+    <h2 style="font-weight: 800;">오늘의 질문 생성기</h2>
+    <p style="color: #666;">수업의 문을 여는 질문을 만듭니다.</p>
+    
+    <input type="text" id="topic" placeholder="오늘의 주제나 키워드 (예: 우정, 친구, 사랑, 기후위기, 시민교육)" 
+           style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 15px;">
+    
+    <button onclick="generateQuestion()" style="width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">질문 생성하기</button>
+    
+    <div id="result" style="margin-top: 30px; display: none; line-height: 1.8; border-left: 4px solid #007bff; padding-left: 20px;">
+        <div id="content" style="font-size: 17px; color: #333;"></div>
+    </div>
+</div>
+
+<script>
+async function generateQuestion() {
+    const topic = document.getElementById('topic').value;
+    if(!topic) return;
+    
+    const content = document.getElementById('content');
+    document.getElementById('result').style.display = 'block';
+    content.innerText = "질문을 빚어내는 중입니다...";
+
+    const response = await fetch('/ask', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message: topic + "에 관한 오늘의 질문을 만들어줘.", mode: "question" })
+    });
+    
+    // 스트리밍 데이터 처리 (기존 로직 활용)
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    content.innerHTML = "";
+    while (true) {
+        const {done, value} = await reader.read();
+        if (done) break;
+        content.innerHTML += decoder.decode(value).replace(/\n/g, '<br>');
+    }
+}
+</script>
