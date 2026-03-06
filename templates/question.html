@@ -14,13 +14,30 @@
             color: #1c1c1e;
         }
 
+       /* 컨테이너: PC에서는 넓고 입체적으로, 모바일에서는 유연하게 */
         #container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 24px 20px;
+            max-width: 900px; /* PC에서 시원하게 보이는 너비 */
+            margin: 40px auto; /* PC에서 상하 여백을 주어 중앙에 배치 */
+            padding: 40px;
             background-color: #ffffff;
-            min-height: 100vh;
+            min-height: auto; /* 내용 길이에 맞춰 조절 */
+            border-radius: 20px; /* 모서리를 부드럽게 */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* 지적인 무게감(그림자) 추가 */
             box-sizing: border-box;
+        }
+
+        /* 모바일 최적화: 화면 너비가 768px 이하일 때 적용 */
+        @media (max-width: 768px) {
+            #container {
+                max-width: 100%;
+                margin: 0; /* 모바일에서는 여백 없이 꽉 차게 */
+                padding: 24px 20px;
+                border-radius: 0; /* 모바일에서는 둥근 모서리 제거 */
+                min-height: 100vh;
+                box-shadow: none; /* 모바일에서는 그림자 제거 */
+            }
+            h2 { font-size: 1.45rem; }
+            .welcome-box p { font-size: 1rem; }
         }
 
         h2 {
@@ -97,6 +114,7 @@
             color: #2c2c2e;
             line-height: 1.8;
             white-space: pre-wrap;
+            word-break: break-word; /* 긴 단어가 영역을 넘어가는 것 방지 */
         }
 
         /* 모바일 최적화 미세 조정 */
@@ -162,3 +180,4 @@
 
 </body>
 </html>
+
