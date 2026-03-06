@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>교사 도구 모음</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F0E8;
+    --bg-card: #FDFAF4;
+    --bg-deep: #EDE8DC;
+    --ink: #2C2416;
+    --ink-light: #4A4035;
+    --ink-muted: #7A6E5F;
+    --accent: #8B6F47;
+    --accent-light: #C4A882;
+    --accent-warm: #D4956A;
+    --border: #DDD5C8;
+    --shadow: rgba(44,36,22,0.08);
+    --green: #3A6B48;
+    --blue: #3A5F94;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  header {
+    text-align: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+    flex-shrink: 0;
+  }
+  header h1 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--ink-light);
+  }
+  header .dot {
+    display: inline-block;
+    width: 4px; height: 4px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin: 0 8px;
+    vertical-align: middle;
+    position: relative; top: -1px;
+  }
+
+  /* ── TAB NAV ── */
+  .tab-nav {
+    display: flex;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 13px 8px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { color: var(--ink-light); }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ── MAIN ── */
+  .tab-content { display: none; flex: 1; padding: 24px 20px; max-width: 960px; margin: 0 auto; width: 100%; }
+  .tab-content.active { display: flex; flex-direction: column; }
+
+  /* ── SHARED COMPONENTS ── */
+  .section-title {
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 18px;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+  .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .txt-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 9px 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .txt-input:focus { border-color: var(--accent-light); }
+  .txt-input::placeholder { color: var(--ink-muted); }
+  .num-input {
+    width: 70px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 9px 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    outline: none;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .num-input:focus { border-color: var(--accent-light); }
+  .btn-primary {
+    padding: 10px 18px;
+    background: var(--ink);
+    color: #f5f0e8;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-primary:hover { background: var(--accent); }
+  .btn-secondary {
+    padding: 10px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink-light);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-secondary:hover { border-color: var(--accent-light); color: var(--accent); }
+  .textarea-bulk {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    resize: none;
+    outline: none;
+    line-height: 1.7;
+    transition: border-color 0.2s;
+  }
+  .textarea-bulk:focus { border-color: var(--accent-light); }
+  .textarea-bulk::placeholder { color: var(--ink-muted); font-size: 0.82rem; }
+
+  /* ════════════════════════════════
+     탭 1 — 모둠 편성기
+  ════════════════════════════════ */
+  #tab-group { gap: 16px; }
+  .group-top { display: flex; gap: 12px; align-items: flex-start; }
+  .group-left { flex: 1; }
+  .group-right { width: 200px; flex-shrink: 0; }
+  .group-setting { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+  .group-setting label { font-size: 0.86rem; color: var(--ink-light); font-weight: 500; letter-spacing: 0.03em; white-space: nowrap; }
+  .group-result { display: grid; gap: 10px; }
+  .group-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 6px var(--shadow);
+  }
+  .group-card-title {
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  .group-members { display: flex; flex-wrap: wrap; gap: 6px; }
+  .member-chip {
+    background: var(--bg-deep);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink);
+    transition: all 0.3s;
+  }
+  .member-chip.new { animation: chipIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+  @keyframes chipIn {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .group-summary {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    letter-spacing: 0.05em;
+    margin-top: 8px;
+  }
+
+  /* ════════════════════════════════
+     탭 2 — 좌석 배치기
+  ════════════════════════════════ */
+  #tab-seat { gap: 16px; }
+  .seat-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .seat-controls label { font-size: 0.78rem; color: var(--ink-light); white-space: nowrap; }
+  .seat-grid-wrap {
+    flex: 1;
+    overflow: auto;
+  }
+  .seat-grid {
+    display: grid;
+    gap: 6px;
+    width: fit-content;
+    margin: 0 auto;
+  }
+  .seat-cell {
+    width: 72px;
+    height: 52px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px var(--shadow);
+    transition: all 0.3s;
+    position: relative;
+  }
+  .seat-cell.filled { border-color: var(--accent-light); background: #FDFAF4; }
+  .seat-cell.empty { opacity: 0.35; }
+  .seat-num {
+    font-size: 0.62rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 2px;
+  }
+  .seat-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+  .seat-cell.new { animation: seatIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+  @keyframes seatIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .blackboard {
+    background: #2C3E35;
+    color: rgba(255,255,255,0.85);
+    text-align: center;
+    padding: 8px;
+    border-radius: 3px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    margin-bottom: 14px;
+  }
+  .print-btn {
+    padding: 9px 16px;
+    background: transparent;
+    border: 1px solid var(--green);
+    border-radius: 3px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--green);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.06em;
+  }
+  .print-btn:hover { background: var(--green); color: #fff; }
+  @media print {
+    header, .tab-nav, .seat-controls, .card, footer-bar { display: none !important; }
+    .tab-content { padding: 0 !important; }
+    .seat-grid-wrap { overflow: visible !important; }
+    .seat-grid { margin: 20px auto !important; }
+  }
+
+  /* ════════════════════════════════
+     탭 3 — 수업 루틴 체크리스트
+  ════════════════════════════════ */
+  #tab-checklist { gap: 14px; }
+  .checklist-phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; flex: 1; }
+  .phase-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    box-shadow: 0 2px 10px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .phase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .phase-title {
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .phase-before .phase-title { color: #3A6B48; }
+  .phase-during .phase-title { color: #7A5F37; }
+  .phase-after  .phase-title { color: #3A5F94; }
+  .phase-progress {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-muted);
+    letter-spacing: 0.05em;
+  }
+  .check-items { flex: 1; display: flex; flex-direction: column; gap: 0; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--bg-deep);
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 2px;
+    position: relative;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item:hover { background: var(--bg-deep); }
+  .check-box {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    font-size: 0.7rem;
+    color: transparent;
+  }
+  .check-item.done .check-box {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .phase-before.phase-card .check-item.done .check-box { background: #4A7C59; border-color: #4A7C59; }
+  .phase-during.phase-card .check-item.done .check-box { background: #8B6F47; border-color: #8B6F47; }
+  .phase-after.phase-card  .check-item.done .check-box { background: #4A6FA5; border-color: #4A6FA5; }
+  .check-label {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--ink);
+    flex: 1;
+    line-height: 1.4;
+    transition: color 0.2s;
+  }
+  .check-item.done .check-label {
+    color: var(--ink-muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--ink-muted);
+  }
+  .del-item {
+    background: none; border: none; cursor: pointer;
+    color: var(--ink-muted); font-size: 0.78rem;
+    padding: 2px 4px; opacity: 0; transition: opacity 0.2s;
+  }
+  .check-item:hover .del-item { opacity: 1; }
+  .add-item-row {
+    display: flex; gap: 6px; margin-top: 12px;
+  }
+  .add-item-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 7px 10px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .add-item-input:focus { border-color: var(--accent-light); }
+  .add-item-input::placeholder { color: var(--ink-muted); }
+  .add-item-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 7px 12px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--ink-light);
+    transition: all 0.2s;
+  }
+  .add-item-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .checklist-actions {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .reset-day-btn {
+    padding: 9px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--ink-light);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+  .reset-day-btn:hover { border-color: var(--accent-warm); color: var(--accent-warm); }
+  .save-note {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    letter-spacing: 0.03em;
+    margin-left: auto;
+  }
+
+  /* ── FOOTER ── */
+  .footer-bar {
+    border-top: 1px solid var(--border);
+    padding: 6px 20px;
+    background: var(--bg-card);
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .footer-bar a {
+    font-size: 0.65rem;
+    color: var(--ink-muted);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-bar a:hover { color: var(--accent); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 700px) {
+    .group-top { flex-direction: column; }
+    .group-right { width: 100%; }
+    .checklist-phases { grid-template-columns: 1fr; }
+    .seat-cell { width: 58px; height: 44px; }
+    .seat-name { font-size: 0.72rem; }
+    .tab-btn { font-size: 0.7rem; padding: 11px 4px; letter-spacing: 0.04em; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>교사 도구 모음<span class="dot"></span>Teacher Toolkit</h1>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('group', this)">모둠 편성기</button>
+  <button class="tab-btn" onclick="switchTab('seat', this)">좌석 배치기</button>
+  <button class="tab-btn" onclick="switchTab('checklist', this)">수업 루틴</button>
+</nav>
+
+<!-- ════════ 탭 1: 모둠 편성기 ════════ -->
+<div id="tab-group" class="tab-content active">
+  <div class="card">
+    <div class="section-title">학생 명단 입력</div>
+    <textarea class="textarea-bulk" id="groupNames" rows="4"
+      placeholder="김민준&#10;이서연&#10;박지호&#10;줄바꿈 또는 쉼표로 구분하여 입력하세요"></textarea>
+    <div style="display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap;">
+      <div class="group-setting">
+        <label>모둠 수</label>
+        <input type="number" class="num-input" id="groupCount" value="4" min="2" max="20">
+        <label style="margin-left:12px;">모둠</label>
+      </div>
+      <button class="btn-primary" onclick="makeGroups()">모둠 편성</button>
+      <button class="btn-secondary" onclick="document.getElementById('groupResult').innerHTML=''; document.getElementById('groupSummary').textContent=''">초기화</button>
+    </div>
+  </div>
+
+  <div id="groupSummary" class="group-summary" style="margin-top:4px;"></div>
+  <div id="groupResult" class="group-result" style="margin-top:4px;"></div>
+</div>
+
+<!-- ════════ 탭 2: 좌석 배치기 ════════ -->
+<div id="tab-seat" class="tab-content">
+  <div class="card">
+    <div class="section-title">명단 및 좌석 설정</div>
+    <textarea class="textarea-bulk" id="seatNames" rows="3"
+      placeholder="학생 이름 (줄바꿈 또는 쉼표 구분)"></textarea>
+    <div style="display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap;">
+      <label style="font-size:0.78rem; color:var(--ink-light);">열(가로)</label>
+      <input type="number" class="num-input" id="seatCols" value="6" min="1" max="12">
+      <label style="font-size:0.78rem; color:var(--ink-light);">행(세로)</label>
+      <input type="number" class="num-input" id="seatRows" value="5" min="1" max="12">
+      <button class="btn-primary" onclick="makeSeats()">배치 생성</button>
+      <button class="btn-secondary" onclick="makeSeats()">다시 섞기</button>
+      <button class="print-btn" onclick="window.print()">출력</button>
+    </div>
+  </div>
+
+  <div class="seat-grid-wrap">
+    <div class="blackboard">칠판 / 교탁</div>
+    <div class="seat-grid" id="seatGrid"></div>
+  </div>
+</div>
+
+<!-- ════════ 탭 3: 수업 루틴 체크리스트 ════════ -->
+<div id="tab-checklist" class="tab-content">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+    <div class="section-title" style="margin-bottom:0;">수업 루틴 체크리스트</div>
+    <div class="checklist-actions">
+      <button class="reset-day-btn" onclick="resetToday()">오늘 체크 초기화</button>
+      <span class="save-note">항목은 자동 저장됩니다</span>
+    </div>
+  </div>
+
+  <div class="checklist-phases">
+    <!-- 수업 전 -->
+    <div class="phase-card phase-before" id="phase-before">
+      <div class="phase-header">
+        <span class="phase-title">수업 전</span>
+        <span class="phase-progress" id="prog-before">0/0</span>
+      </div>
+      <div class="check-items" id="items-before"></div>
+      <div class="add-item-row">
+        <input class="add-item-input" placeholder="항목 추가" id="add-before"
+          onkeydown="if(event.key==='Enter') addItem('before')">
+        <button class="add-item-btn" onclick="addItem('before')">+</button>
+      </div>
+    </div>
+
+    <!-- 수업 중 -->
+    <div class="phase-card phase-during" id="phase-during">
+      <div class="phase-header">
+        <span class="phase-title">수업 중</span>
+        <span class="phase-progress" id="prog-during">0/0</span>
+      </div>
+      <div class="check-items" id="items-during"></div>
+      <div class="add-item-row">
+        <input class="add-item-input" placeholder="항목 추가" id="add-during"
+          onkeydown="if(event.key==='Enter') addItem('during')">
+        <button class="add-item-btn" onclick="addItem('during')">+</button>
+      </div>
+    </div>
+
+    <!-- 수업 후 -->
+    <div class="phase-card phase-after" id="phase-after">
+      <div class="phase-header">
+        <span class="phase-title">수업 후</span>
+        <span class="phase-progress" id="prog-after">0/0</span>
+      </div>
+      <div class="check-items" id="items-after"></div>
+      <div class="add-item-row">
+        <input class="add-item-input" placeholder="항목 추가" id="add-after"
+          onkeydown="if(event.key==='Enter') addItem('after')">
+        <button class="add-item-btn" onclick="addItem('after')">+</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer-bar">
+  <a href="https://cafe.naver.com/lovekyocom" target="_blank" rel="noopener">© 교실밖 2026</a>
+</div>
+
+<script>
+// ── TAB ──────────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ════════════════════════════════════════
+// 모둠 편성기
+// ════════════════════════════════════════
+function makeGroups() {
+  const raw = document.getElementById('groupNames').value;
+  const names = raw.split(/[\n,，]+/).map(s => s.trim()).filter(s => s);
+  const n = parseInt(document.getElementById('groupCount').value) || 4;
+  if (names.length === 0) return;
+
+  // Fisher-Yates shuffle
+  const arr = [...names];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+
+  const groups = Array.from({ length: n }, () => []);
+  arr.forEach((name, i) => groups[i % n].push(name));
+
+  const colors = ['#8B6F47','#4A7C59','#4A6FA5','#8B4A6F','#6F8B4A','#6F4A8B','#4A6F8B','#8B6F4A'];
+  const result = document.getElementById('groupResult');
+  result.style.gridTemplateColumns = `repeat(${Math.min(n, 4)}, 1fr)`;
+  result.innerHTML = '';
+
+  groups.forEach((members, gi) => {
+    const card = document.createElement('div');
+    card.className = 'group-card';
+    card.innerHTML = `<div class="group-card-title" style="color:${colors[gi % colors.length]}">${gi + 1}모둠 (${members.length}명)</div>
+      <div class="group-members">${members.map((m, mi) => `<span class="member-chip new" style="animation-delay:${mi * 0.05}s">${m}</span>`).join('')}</div>`;
+    result.appendChild(card);
+  });
+
+  document.getElementById('groupSummary').textContent =
+    `총 ${names.length}명 → ${n}모둠 편성 완료`;
+}
+
+// ════════════════════════════════════════
+// 좌석 배치기
+// ════════════════════════════════════════
+function makeSeats() {
+  const raw = document.getElementById('seatNames').value;
+  const names = raw.split(/[\n,，]+/).map(s => s.trim()).filter(s => s);
+  const cols = Math.max(1, parseInt(document.getElementById('seatCols').value) || 6);
+  const rows = Math.max(1, parseInt(document.getElementById('seatRows').value) || 5);
+  const total = cols * rows;
+
+  // shuffle
+  const arr = [...names];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+
+  const grid = document.getElementById('seatGrid');
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  grid.innerHTML = '';
+
+  for (let i = 0; i < total; i++) {
+    const cell = document.createElement('div');
+    const name = arr[i] || '';
+    cell.className = 'seat-cell new ' + (name ? 'filled' : 'empty');
+    cell.style.animationDelay = (i * 0.02) + 's';
+    cell.innerHTML = `<span class="seat-num">${i + 1}번</span><span class="seat-name">${name}</span>`;
+    grid.appendChild(cell);
+  }
+}
+
+// ════════════════════════════════════════
+// 수업 루틴 체크리스트
+// ════════════════════════════════════════
+const DEFAULT_ITEMS = {
+  before: ['학습 목표 확인', '출석 점검', '전시 학습 복습', '학습 자료 준비', '수업 환경 점검'],
+  during: ['학습 목표 제시', '모둠 활동 운영', '학생 참여 유도', '발문 및 피드백', '시간 관리'],
+  after:  ['정리 및 마무리', '과제 안내', '수업 반성 기록', '다음 차시 준비', '교실 정돈'],
+};
+
+let checklist = {};
+let checks = {};
+
+function loadChecklist() {
+  const saved = localStorage.getItem('tk_checklist');
+  checklist = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_ITEMS));
+  const savedChecks = localStorage.getItem('tk_checks_' + today());
+  checks = savedChecks ? JSON.parse(savedChecks) : {};
+}
+
+function saveChecklist() {
+  localStorage.setItem('tk_checklist', JSON.stringify(checklist));
+}
+
+function saveChecks() {
+  localStorage.setItem('tk_checks_' + today(), JSON.stringify(checks));
+}
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function renderPhase(phase) {
+  const container = document.getElementById('items-' + phase);
+  container.innerHTML = '';
+  const items = checklist[phase] || [];
+  items.forEach((label, i) => {
+    const key = phase + '_' + i;
+    const done = !!checks[key];
+    const el = document.createElement('div');
+    el.className = 'check-item' + (done ? ' done' : '');
+    el.innerHTML = `
+      <div class="check-box">${done ? '✓' : ''}</div>
+      <span class="check-label">${label}</span>
+      <button class="del-item" onclick="deleteItem('${phase}', ${i}, event)">✕</button>`;
+    el.addEventListener('click', (e) => {
+      if (e.target.classList.contains('del-item')) return;
+      checks[key] = !checks[key];
+      saveChecks();
+      renderPhase(phase);
+      updateProgress(phase);
+    });
+    container.appendChild(el);
+  });
+  updateProgress(phase);
+}
+
+function updateProgress(phase) {
+  const items = checklist[phase] || [];
+  const done = items.filter((_, i) => checks[phase + '_' + i]).length;
+  document.getElementById('prog-' + phase).textContent = `${done}/${items.length}`;
+}
+
+function addItem(phase) {
+  const input = document.getElementById('add-' + phase);
+  const val = input.value.trim();
+  if (!val) return;
+  checklist[phase].push(val);
+  saveChecklist();
+  renderPhase(phase);
+  input.value = '';
+  input.focus();
+}
+
+function deleteItem(phase, idx, e) {
+  e.stopPropagation();
+  checklist[phase].splice(idx, 1);
+  // rebuild check keys
+  const newChecks = {};
+  Object.keys(checks).forEach(k => {
+    const [p, i] = k.split('_');
+    if (p !== phase) { newChecks[k] = checks[k]; return; }
+    const ni = parseInt(i);
+    if (ni < idx) newChecks[k] = checks[k];
+    else if (ni > idx) newChecks[phase + '_' + (ni - 1)] = checks[k];
+  });
+  checks = newChecks;
+  saveChecklist();
+  saveChecks();
+  renderPhase(phase);
+}
+
+function resetToday() {
+  if (!confirm('오늘 체크 내용을 모두 초기화하시겠습니까?')) return;
+  checks = {};
+  saveChecks();
+  ['before', 'during', 'after'].forEach(renderPhase);
+}
+
+// ── INIT ────────────────────────────────────────────────
+loadChecklist();
+['before', 'during', 'after'].forEach(renderPhase);
+</script>
+</body>
+</html>
