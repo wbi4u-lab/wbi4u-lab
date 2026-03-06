@@ -19,13 +19,18 @@ PERSONAS = {
 
 @app.route('/')
 def index():
-    # 기본 대문 페이지
+    # 대문 페이지: 연구소의 얼굴
     return render_template('index.html')
 
 @app.route('/classroom_tool.html')
 def classroom_tool():
-    # 지정된 주소로 들어올 때만 실행되는 도구 페이지
+    # 교육 전문가 도구: 지적인 상담의 장
     return render_template('classroom_tool.html')
+
+@app.route('/digital_watch.html')
+def digital_watch():
+    # 디지털 워치: 실무적인 편의 도구
+    return render_template('digital_watch.html')
 
 @app.route('/ask', methods=['POST'])
 def ask():
@@ -58,3 +63,4 @@ def ask():
 if __name__ == '__main__':
     # 렌더 배포 환경에 맞게 호스트와 포트 설정 가능 (로컬 테스트용 debug=True)
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
+
