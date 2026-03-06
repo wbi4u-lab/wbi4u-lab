@@ -637,6 +637,45 @@
   }
   .encourage-btn:hover { border-color: var(--accent-light); color: var(--accent); }
 
+  /* ── 모바일 반응형 ───────────────────────────────── */
+  @media (max-width: 768px) {
+    body { height: auto; overflow: auto; }
+
+    header { padding: 12px 16px; }
+    header h1 { font-size: 0.95rem; letter-spacing: 0.1em; }
+    .theme-btn { font-size: 0.65rem; padding: 5px 10px; right: 10px; }
+
+    .workspace {
+      flex-direction: column;
+      padding: 12px;
+      gap: 10px;
+      overflow: visible;
+    }
+
+    .panel-timer,
+    .panel-selector { width: 100%; flex-shrink: unset; }
+
+    .panel-center {
+      margin: 0;
+      min-height: 180px;
+      order: -1;
+    }
+
+    .timer-presets { grid-template-columns: repeat(4, 1fr); }
+
+    .timer-digits { font-size: 3rem; }
+
+    .selected-name { font-size: 2.8rem; }
+
+    .name-list { max-height: 160px; min-height: unset; }
+
+    footer { padding: 10px 16px; }
+    .encouragement-inner { flex-wrap: wrap; gap: 8px; }
+    .encouragement-text { width: 100%; order: 2; }
+    .encouragement-label { order: 1; }
+    .encourage-btn { order: 3; }
+  }
+
   /* Ripple on pick */
   @keyframes ripple {
     0% { transform: scale(0.8); opacity: 0.6; }
