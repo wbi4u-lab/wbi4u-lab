@@ -1,41 +1,164 @@
-<div id="container" style="max-width: 600px; margin: auto; padding: 20px;">
-    <h2 style="font-weight: 800;">오늘의 질문 생성기</h2>
-    <p style="color: #666;">수업의 문을 여는 질문을 만듭니다.<br> 입력창에 질문을 생성하고 싶은 키워드를 입력하세요. </p>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>오늘의 질문 생성기</title>
+    <style>
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f7; /* 모바일 앱 느낌의 연한 회색 배경 */
+            color: #1c1c1e;
+        }
+
+        #container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 24px 20px;
+            background-color: #ffffff;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+        }
+
+        /* 개선된 웰컴 박스: 정중하고 명료한 문체 */
+        .welcome-box {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px solid #e5e5ea;
+        }
+
+        .welcome-box p {
+            margin: 0;
+            font-size: 1.05rem; /* 모바일 가독성을 위해 키움 */
+            color: #3a3a3c;
+            word-break: keep-all;
+        }
+
+        .welcome-box .highlight {
+            color: #007bff;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem; /* 모바일 입력 시 자동 줌 방지를 위해 16px 이상 권장 */
+            border-radius: 12px;
+            border: 1.5px solid #d1d1d6;
+            box-sizing: border-box;
+            margin-bottom: 16px;
+            -webkit-appearance: none; /* iOS 기본 스타일 제거 */
+        }
+
+        button {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
+        }
+
+        button:active {
+            transform: scale(0.98);
+            background-color: #0056b3;
+        }
+
+        #result {
+            margin-top: 32px;
+            display: none;
+            padding: 24px;
+            border-radius: 16px;
+            background-color: #f9f9fb;
+            border: 1px solid #efeff4;
+        }
+
+        #content {
+            font-size: 1.1rem; /* 결과물 텍스트를 시원하게 키움 */
+            color: #2c2c2e;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        /* 모바일 최적화 미세 조정 */
+        @media (max-width: 480px) {
+            h2 { font-size: 1.45rem; }
+            .welcome-box p { font-size: 1rem; }
+            #content { font-size: 1.05rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <h2>오늘의 수업 질문 생성기</h2>
     
-    <input type="text" id="topic" placeholder="오늘의 주제나 키워드 (예: 우정, 친구, 사랑, 기후위기, 시민교육)" 
-           style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 15px;">
+    <div class="welcome-box">
+        <p>
+            <span class="highlight">좋은 질문을 만드는 것은 효과적인 수업의 시작입니다.</span>
+            아래 입력창에 생성할 질문의 주제나 키워드를 입력해 주세요. 깊이 있는 화두로 수업의 문을 열어드립니다.
+        </p>
+    </div>
     
-    <button onclick="generateQuestion()" style="width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">질문 생성하기</button>
+    <input type="text" id="topic" placeholder="예: 기후위기, 우정, 인공지능 윤리, 시민교육">
+    <button onclick="generateQuestion()">질문 생성하기</button>
     
-    <div id="result" style="margin-top: 30px; display: none; line-height: 1.8; border-left: 4px solid #007bff; padding-left: 20px;">
-        <div id="content" style="font-size: 17px; color: #333;"></div>
+    <div id="result">
+        <div id="content"></div>
     </div>
 </div>
 
 <script>
-async function generateQuestion() {
-    const topic = document.getElementById('topic').value;
-    if(!topic) return;
-    
-    const content = document.getElementById('content');
-    document.getElementById('result').style.display = 'block';
-    content.innerText = "질문을 빚어내는 중입니다...";
+    async function generateQuestion() {
+        const topic = document.getElementById('topic').value;
+        if(!topic) return;
+        
+        const content = document.getElementById('content');
+        document.getElementById('result').style.display = 'block';
+        
+        // 로딩 메시지에 지적인 표현 배치
+        content.innerText = "수업 질문을 생성하고 있습니다...";
 
-    const response = await fetch('/ask', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ message: topic + "에 관한 오늘의 질문을 만들어줘.", mode: "question" })
-    });
-    
-    // 스트리밍 데이터 처리 (기존 로직 활용)
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    content.innerHTML = "";
-    while (true) {
-        const {done, value} = await reader.read();
-        if (done) break;
-        content.innerHTML += decoder.decode(value).replace(/\n/g, '<br>');
+        try {
+            const response = await fetch('/ask', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ message: topic + "에 관한 오늘의 질문을 만들어줘.", mode: "question" })
+            });
+            
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            content.innerHTML = "";
+            
+            while (true) {
+                const {done, value} = await reader.read();
+                if (done) break;
+                content.innerHTML += decoder.decode(value);
+            }
+        } catch (e) {
+            content.innerText = "오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
+        }
     }
-}
-
 </script>
+
+</body>
+</html>
