@@ -19,6 +19,10 @@ PERSONAS = {
 def index():
     return render_template('index.html')
 
+@app.route('/<path:filename>')
+def serve_template(filename):
+    return render_template(filename)
+    
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.get_json()
@@ -45,4 +49,5 @@ def ask():
     return Response(generate(), content_type='text/plain; charset=utf-8')
 
 if __name__ == '__main__':
+
     app.run(debug=True)
