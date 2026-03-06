@@ -3,11 +3,13 @@ from flask import Flask, render_template, request, jsonify, Response
 import google.generativeai as genai
 from dotenv import load_dotenv
 
+# 환경 변수 로드 및 제미나이 설정
 load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 app = Flask(__name__)
 
+# 교육 전문가 페르소나 설정 (교실밖의 지적인 평어체 유지)
 PERSONAS = {
     "lesson": "당신은 교육 이론과 현장 실무에 모두 능통한 교육과정 전문가다. 교사가 수업 주제를 제시하면, 인문학적 성찰과 학생의 주도성을 끌어내는 구체적이고 실현 가능한 수업과정안을 제안하라. 답변은 항상 전문적이고 지적인 '평어체(한다, 이다)'로 작성하며, 사실에 근거한 명확한 교육적 논리를 포함하라.",
     "management": "당신은 다년간의 풍부한 현장 경험을 가진 학급운영 및 생활지도 전문가다. 학급 내 갈등이나 운영 문제에 대해 감정적 위로보다는, 학생의 성장과 교육적 회복에 초점을 맞춘 실무적이고 지혜로운 해결책을 제시하라. 답변은 항상 단호하면서도 품격 있는 '평어체(한다, 이다)'로 작성하라.",
@@ -17,12 +19,14 @@ PERSONAS = {
 
 @app.route('/')
 def index():
+    # 기본 대문 페이지
     return render_template('index.html')
 
-@app.route('/<path:filename>')
-def serve_template(filename):
-    return render_template(filename)
-    
+@app.route('/classroom_tool.html')
+def classroom_tool():
+    # 지정된 주소로 들어올 때만 실행되는 도구 페이지
+    return render_template('classroom_tool.html')
+
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.get_json()
@@ -30,7 +34,8 @@ def ask():
     mode = data.get('mode', 'lesson')
     
     base_instruction = PERSONAS.get(mode, PERSONAS["lesson"])
-    system_instruction = base_instruction + " 단, 답변을 출력할 때 ** 기호(마크다운 볼드체)는 절대 사용하지 마라. 순수한 텍스트로만 형태를 구성하라."
+    # 볼드체(**) 방지 및 순수 텍스트 구성 지침 추가
+    system_instruction = f"{base_instruction} 단, 답변을 출력할 때 ** 기호(마크다운 볼드체)는 절대 사용하지 마라. 순수한 텍스트로만 형태를 구성하라."
     
     def generate():
         try:
@@ -44,10 +49,12 @@ def ask():
                 if chunk.text:
                     yield chunk.text
         except Exception as e:
-            yield f"오류가 발생했습니다: {str(e)}"
+            # 에러 발생 시 사용자에게 품격 있게 전달하기 위해 에러 내용만 전송
+            # 상세한 429 에러 등은 프론트엔드(HTML)의 catch 문에서 처리됨
+            yield f"Error: {str(e)}"
             
     return Response(generate(), content_type='text/plain; charset=utf-8')
 
 if __name__ == '__main__':
-
-    app.run(debug=True)
+    # 렌더 배포 환경에 맞게 호스트와 포트 설정 가능 (로컬 테스트용 debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
