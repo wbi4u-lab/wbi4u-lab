@@ -1,6 +1,6 @@
 <div id="container" style="max-width: 600px; margin: auto; padding: 20px;">
     <h2 style="font-weight: 800;">오늘의 질문 생성기</h2>
-    <p style="color: #666;">수업의 문을 여는 질문을 만듭니다.</p>
+    <p style="color: #666;">수업의 문을 여는 질문을 만듭니다.<br> 입력창에 질문을 생성하고 싶은 키워드를 입력하세요. </p>
     
     <input type="text" id="topic" placeholder="오늘의 주제나 키워드 (예: 우정, 친구, 사랑, 기후위기, 시민교육)" 
            style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 15px;">
@@ -37,4 +37,5 @@ async function generateQuestion() {
         content.innerHTML += decoder.decode(value).replace(/\n/g, '<br>');
     }
 }
+
 </script>
