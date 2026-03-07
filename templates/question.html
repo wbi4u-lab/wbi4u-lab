@@ -10,31 +10,29 @@
             line-height: 1.6;
             margin: 0;
             padding: 0;
-            background-color: #f2f2f7; /* 모바일 앱 느낌의 연한 회색 배경 */
+            background-color: #f2f2f7; 
             color: #1c1c1e;
         }
 
-       /* 컨테이너: PC에서는 넓고 입체적으로, 모바일에서는 유연하게 */
         #container {
-            max-width: 900px; /* PC에서 시원하게 보이는 너비 */
-            margin: 40px auto; /* PC에서 상하 여백을 주어 중앙에 배치 */
+            max-width: 900px; 
+            margin: 40px auto; 
             padding: 40px;
             background-color: #ffffff;
-            min-height: auto; /* 내용 길이에 맞춰 조절 */
-            border-radius: 20px; /* 모서리를 부드럽게 */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* 지적인 무게감(그림자) 추가 */
+            min-height: auto; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
             box-sizing: border-box;
         }
 
-        /* 모바일 최적화: 화면 너비가 768px 이하일 때 적용 */
         @media (max-width: 768px) {
             #container {
                 max-width: 100%;
-                margin: 0; /* 모바일에서는 여백 없이 꽉 차게 */
+                margin: 0; 
                 padding: 24px 20px;
-                border-radius: 0; /* 모바일에서는 둥근 모서리 제거 */
+                border-radius: 0; 
                 min-height: 100vh;
-                box-shadow: none; /* 모바일에서는 그림자 제거 */
+                box-shadow: none; 
             }
             h2 { font-size: 1.45rem; }
             .welcome-box p { font-size: 1rem; }
@@ -48,7 +46,6 @@
             letter-spacing: -0.02em;
         }
 
-        /* 개선된 웰컴 박스: 정중하고 명료한 문체 */
         .welcome-box {
             background-color: #f8f9fa;
             padding: 20px;
@@ -59,7 +56,7 @@
 
         .welcome-box p {
             margin: 0;
-            font-size: 1.05rem; /* 모바일 가독성을 위해 키움 */
+            font-size: 1.05rem; 
             color: #3a3a3c;
             word-break: keep-all;
         }
@@ -74,12 +71,12 @@
         input[type="text"] {
             width: 100%;
             padding: 16px;
-            font-size: 1.1rem; /* 모바일 입력 시 자동 줌 방지를 위해 16px 이상 권장 */
+            font-size: 1.1rem; 
             border-radius: 12px;
             border: 1.5px solid #d1d1d6;
             box-sizing: border-box;
             margin-bottom: 16px;
-            -webkit-appearance: none; /* iOS 기본 스타일 제거 */
+            -webkit-appearance: none; 
         }
 
         button {
@@ -110,14 +107,18 @@
         }
 
         #content {
-            font-size: 1.1rem; /* 결과물 텍스트를 시원하게 키움 */
+            font-size: 1.1rem; 
             color: #2c2c2e;
             line-height: 1.8;
             white-space: pre-wrap;
-            word-break: break-word; /* 긴 단어가 영역을 넘어가는 것 방지 */
+            word-break: break-word; 
         }
 
-        /* 모바일 최적화 미세 조정 */
+        .error-message {
+            color: #e74c3c;
+            font-weight: 500;
+        }
+
         @media (max-width: 480px) {
             h2 { font-size: 1.45rem; }
             .welcome-box p { font-size: 1rem; }
@@ -153,8 +154,7 @@
         const content = document.getElementById('content');
         document.getElementById('result').style.display = 'block';
         
-        // 로딩 메시지에 지적인 표현 배치
-        content.innerText = "수업 질문을 생성하고 있습니다...";
+        content.innerHTML = "수업 질문을 생성하고 있습니다...";
 
         try {
             const response = await fetch('/ask', {
@@ -162,6 +162,15 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ message: topic + "에 관한 오늘의 질문을 만들어줘.", mode: "question" })
             });
+            
+            if (response.status === 429) {
+                content.innerHTML = "<span class='error-message'>실시간 사용량 급증으로 응답이 일시적으로 지연되고 있습니다.<br>쾌적한 담론 형성을 위해 약 30초 후 다시 시도해 주시면 감사하겠습니다.</span>";
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error("서버 응답 오류");
+            }
             
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
@@ -173,12 +182,10 @@
                 content.innerHTML += decoder.decode(value);
             }
         } catch (e) {
-            content.innerText = "오류가 발생했습니다. 잠시 후 다시 시도해 주세요.";
+            content.innerHTML = "<span class='error-message'>네트워크 연결이 원활하지 않거나 서버 오류가 발생했습니다.<br>잠시 후 다시 시도해 주세요.</span>";
         }
     }
 </script>
 
 </body>
 </html>
-
-
