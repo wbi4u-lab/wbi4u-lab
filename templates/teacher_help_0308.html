@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>With AI For U Lab - 교실밖</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg: #f0f4f8;
+            --surface: #ffffff;
+            --surface2: #f5f8fc;
+            --border: #dde6ee;
+            --accent: #2563a8;
+            --accent-dark: #1a4a8a;
+            --accent-soft: rgba(37,99,168,0.08);
+            --text: #1a2535;
+            --text-muted: #6b7a8d;
+            --text-dim: #a0aab4;
+            --user-bubble-bg: linear-gradient(135deg, #1a4a8a, #2563a8);
+            --ai-bubble-bg: #f5f8fc;
+            --radius: 14px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 헤더 */
+        .page-header {
+            width: 100%;
+            background: linear-gradient(135deg, #0f2952 0%, #1a4a8a 100%);
+            padding: 28px 40px 24px;
+            color: white;
+            box-shadow: 0 4px 20px rgba(15,41,82,0.2);
+            animation: fadeDown 0.5s ease;
+        }
+        .header-inner {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+        .header-label {
+            font-size: 11px;
+            letter-spacing: 3px;
+            opacity: 0.55;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .header-title-row {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+        .header-title {
+            font-family: 'Noto Serif KR', serif;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        .header-sub {
+            font-size: 13px;
+            opacity: 0.55;
+            letter-spacing: 1px;
+        }
+        .header-tagline {
+            font-size: 13px;
+            opacity: 0.65;
+            margin-top: 2px;
+        }
+
+        /* 메인 */
+        .main {
+            width: 100%;
+            max-width: 780px;
+            padding: 24px 20px 48px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            animation: fadeUp 0.5s ease 0.1s both;
+        }
+
+        /* 카드 공통 */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        /* 모드 선택 */
+        .mode-wrap {
+            padding: 14px 18px;
+        }
+        .mode-label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .mode-selector {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .mode-selector input { display: none; }
+        .mode-btn {
+            display: block;
+            padding: 7px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: var(--surface2);
+            border: 1.5px solid var(--border);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+        }
+        .mode-selector input:checked ~ .mode-btn {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent-dark);
+            font-weight: 700;
+        }
+        .mode-btn:hover {
+            border-color: #a0bcda;
+            color: var(--text);
+        }
+
+        /* 채팅 박스 */
+        #chat-box {
+            padding: 22px 20px;
+            min-height: 420px;
+            max-height: 480px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+            background: var(--surface2);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        #chat-box::-webkit-scrollbar { width: 4px; }
+        #chat-box::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        /* 빈 상태 */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--text-dim);
+            padding: 40px 0;
+        }
+        .empty-icon {
+            width: 52px; height: 52px;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            background: var(--surface);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .empty-state p { font-size: 13px; color: var(--text-dim); }
+
+        /* 메시지 */
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 82%;
+            animation: msgIn 0.25s ease;
+        }
+        .message.user-msg { align-self: flex-end; align-items: flex-end; }
+        .message.ai-msg  { align-self: flex-start; align-items: flex-start; }
+
+        .sender-name {
+            font-size: 11px;
+            letter-spacing: 0.8px;
+            margin-bottom: 5px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .user-msg .sender-name { color: var(--accent); }
+        .ai-msg  .sender-name  { color: var(--text-muted); }
+
+        .bubble {
+            padding: 12px 16px;
+            border-radius: 13px;
+            line-height: 1.85;
+            font-size: 14px;
+            word-break: break-word;
+        }
+        .user-msg .bubble {
+            background: var(--user-bubble-bg);
+            color: #e8f0fb;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 3px 10px rgba(37,99,168,0.25);
+        }
+        .ai-msg .bubble {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+
+        /* 타이핑 인디케이터 */
+        .typing-dots {
+            display: inline-flex;
+            gap: 4px;
+            align-items: center;
+            padding: 2px 0;
+        }
+        .typing-dots span {
+            width: 5px; height: 5px;
+            background: var(--text-dim);
+            border-radius: 50%;
+            animation: dot 1.2s infinite;
+        }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        /* 에러 */
+        .error-bubble {
+            background: #fff5f5;
+            border: 1px solid #fca5a5;
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #c0392b;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        /* 입력 영역 */
+        .input-wrap {
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: border-color 0.2s;
+        }
+        .input-wrap:focus-within {
+            border-color: #a0bcda;
+            box-shadow: 0 2px 12px rgba(37,99,168,0.08);
+        }
+        textarea {
+            width: 100%;
+            height: 82px;
+            background: var(--surface2);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            line-height: 1.7;
+            resize: none;
+            outline: none;
+            padding: 11px 14px;
+            transition: border-color 0.2s;
+        }
+        textarea:focus { border-color: #a0bcda; background: #fff; }
+        textarea::placeholder { color: var(--text-dim); }
+
+        .input-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .input-hint { font-size: 11px; color: var(--text-dim); }
+
+        .btn-group { display: flex; gap: 8px; }
+
+        button {
+            padding: 9px 20px;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            transition: all 0.18s;
+            letter-spacing: 0.2px;
+        }
+        #send-btn {
+            background: linear-gradient(135deg, #1a4a8a, #2563a8);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37,99,168,0.3);
+        }
+        #send-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,168,0.35); }
+        #send-btn:active { transform: translateY(0); }
+
+        #pdf-btn {
+            background: var(--surface2);
+            color: var(--text-muted);
+            border: 1.5px solid var(--border);
+        }
+        #pdf-btn:hover { color: var(--text); border-color: #a0bcda; }
+
+        /* 애니메이션 */
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes msgIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes dot {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+            30% { transform: translateY(-4px); opacity: 1; }
+        }
+
+        @media (max-width: 520px) {
+            .page-header { padding: 22px 16px 18px; }
+            .main { padding: 16px 12px 32px; }
+            #chat-box { min-height: 340px; max-height: 380px; }
+            .input-hint { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="page-header">
+    <div class="header-inner">
+        <div class="header-label">교사 AI 도우미</div>
+        <div class="header-title-row">
+            <span class="header-title">With AI For U Lab</span>
+            <span class="header-sub">교실밖</span>
+        </div>
+        <p class="header-tagline">수업과정안 · 학급운영 · 교권상담 · AI활용을 도와드립니다</p>
+    </div>
+</div>
+
+<div class="main">
+
+    <!-- 모드 선택 -->
+    <div class="card mode-wrap">
+        <div class="mode-label">상담 영역 선택</div>
+        <div class="mode-selector">
+            <label><input type="radio" name="mode" value="lesson" checked><span class="mode-btn">📚 수업과정안</span></label>
+            <label><input type="radio" name="mode" value="management"><span class="mode-btn">🏫 학급운영</span></label>
+            <label><input type="radio" name="mode" value="rights"><span class="mode-btn">🛡 교권상담</span></label>
+            <label><input type="radio" name="mode" value="ai_edu"><span class="mode-btn">🤖 AI활용</span></label>
+        </div>
+    </div>
+
+    <!-- 채팅 -->
+    <div id="chat-box">
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">💬</div>
+            <p>어떤 도움이 필요하신가요?</p>
+        </div>
+    </div>
+
+    <!-- 입력 -->
+    <div class="card input-wrap">
+        <textarea id="user-input" placeholder="질문이나 고민을 자유롭게 입력하세요..."></textarea>
+        <div class="input-footer">
+            <span class="input-hint">Enter 전송 &nbsp;·&nbsp; Shift+Enter 줄바꿈</span>
+            <div class="btn-group">
+                <button id="pdf-btn" onclick="saveAsPDF()">🖨 저장</button>
+                <button id="send-btn" onclick="ask()">전송 ↑</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let hasMessages = false;
+
+    function hideEmpty() {
+        if (!hasMessages) {
+            const el = document.getElementById('emptyState');
+            if (el) el.remove();
+            hasMessages = true;
+        }
+    }
+
+    function appendMessage(sender, message, className) {
+        hideEmpty();
+        const chatBox = document.getElementById('chat-box');
+        const wrapper = document.createElement('div');
+        wrapper.className = 'message ' + className;
+        const displayName = sender === 'AI' ? 'AI 교실밖' : '나';
+        wrapper.innerHTML = `
+            <span class="sender-name">${displayName}</span>
+            <div class="bubble"><span class="content">${message}</span></div>
+        `;
+        chatBox.appendChild(wrapper);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return wrapper;
+    }
+
+    async function ask() {
+        const input = document.getElementById('user-input');
+        const message = input.value.trim();
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        if (!message) return;
+
+        appendMessage('User', message.replace(/\n/g, '<br>'), 'user-msg');
+        input.value = '';
+
+        // 타이핑 인디케이터
+        hideEmpty();
+        const chatBox = document.getElementById('chat-box');
+        const aiWrapper = document.createElement('div');
+        aiWrapper.className = 'message ai-msg';
+        aiWrapper.innerHTML = `
+            <span class="sender-name">AI 교실밖</span>
+            <div class="bubble">
+                <div class="typing-dots"><span></span><span></span><span></span></div>
+            </div>
+        `;
+        chatBox.appendChild(aiWrapper);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            const response = await fetch('/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message, mode })
+            });
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = "";
+            const bubble = aiWrapper.querySelector('.bubble');
+            bubble.innerHTML = '<span class="content"></span>';
+            const contentSpan = bubble.querySelector('.content');
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                fullText += decoder.decode(value, { stream: true });
+                contentSpan.innerHTML = fullText.replace(/\n/g, '<br>');
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        } catch (error) {
+            const bubble = aiWrapper.querySelector('.bubble');
+            if (error.toString().includes("429")) {
+                bubble.innerHTML = `<div class="error-bubble">현재 많은 분이 이용 중입니다.<br><strong>약 1분 후에 다시 질문해 주시겠습니까?</strong><br><small style="display:block;margin-top:4px;opacity:0.7">API 할당량 일시 초과입니다.</small></div>`;
+            } else {
+                bubble.innerHTML = `<div class="error-bubble">일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.</div>`;
+            }
+        }
+    }
+
+    async function saveAsPDF() {
+        const { jsPDF } = window.jspdf;
+        const chatBox = document.getElementById('chat-box');
+        if (!hasMessages) return;
+        const pdfBtn = document.getElementById('pdf-btn');
+        pdfBtn.innerText = "처리 중...";
+        try {
+            const orig = chatBox.style.cssText;
+            chatBox.style.cssText = "height:auto;overflow:visible;width:740px;background:#f5f8fc;padding:24px;";
+            const canvas = await html2canvas(chatBox, { scale: 2, useCORS: true, backgroundColor: "#f5f8fc" });
+            chatBox.style.cssText = orig;
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const imgProps = pdf.getImageProperties(imgData);
+            const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight);
+            pdf.save(`교실밖_상담기록_${new Date().toISOString().slice(0,10)}.pdf`);
+        } catch(e) { alert("저장에 실패했습니다."); }
+        finally { pdfBtn.innerText = "🖨 저장"; }
+    }
+
+    document.getElementById('user-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey && window.innerWidth > 480) {
+            e.preventDefault();
+            ask();
+        }
+    });
+</script>
+</body>
+</html>
