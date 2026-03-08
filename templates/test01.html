@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>교육활동 지원 도구 - 연구실</title>
+    <style>
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #f4f4f8;
+            color: #2c2c2e;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            color: #1a1a1a;
+            margin-top: 0;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .guide-box {
+            background-color: #f8f9fa;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            border: 1px solid #e9ecef;
+            color: #495057;
+            word-break: keep-all;
+        }
+
+        .guide-box span.highlight {
+            color: #2c3e50;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 16px;
+            border: 1.5px solid #d1d1d6;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-size: 1.05rem;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        button {
+            background-color: #34495e;
+            color: white;
+            border: none;
+            padding: 18px 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s ease;
+        }
+
+        button:active {
+            background-color: #2c3e50;
+            transform: scale(0.99);
+        }
+
+        #result {
+            margin-top: 32px;
+            padding: 24px;
+            background-color: #fafafa;
+            border-radius: 12px;
+            border-left: 4px solid #34495e;
+            display: none;
+        }
+
+        #content {
+            font-size: 1.05rem;
+            color: #333;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container { margin: 10px auto; padding: 24px 20px; }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>교육활동 지원 도구</h1>
+        
+        <div class="guide-box">
+            <span class="highlight">인공지능과 교육의 연결점을 탐구하는 비공개 실험실입니다.</span>
+            현재 시스템 안정성 및 API 할당량 관리를 위해 연구 목적으로만 제한 운영 중입니다. 아래에 수업 주제나 학생 지도 상황을 입력하면, 교육적 맥락을 고려한 구체적인 조언이나 자료 초안을 생성합니다.
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="topic" placeholder="예: 고등학교 1학년 대상 기후위기 토론 수업 도입부">
+        </div>
+        <div class="input-group">
+            <textarea id="context" placeholder="추가적인 배경 상황이나 구체적인 요구사항을 입력해 주십시오. (선택 사항)"></textarea>
+        </div>
+
+        <button onclick="requestHelp()">인사이트 생성</button>
+
+        <div id="result">
+            <div id="content"></div>
+        </div>
+    </div>
+
+    <script>
+        async function requestHelp() {
+            const topic = document.getElementById('topic').value;
+            const contextText = document.getElementById('context').value;
+            if (!topic) return;
+
+            const contentArea = document.getElementById('content');
+            document.getElementById('result').style.display = 'block';
+            contentArea.innerHTML = "인공지능이 교육적 맥락을 분석하고 있습니다. 잠시만 기다려 주십시오...";
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    // 백엔드(Render)에서 받을 수 있도록 메시지 형태를 구성했어
+                    body: JSON.stringify({
+                        message: `주제: ${topic}\n배경 상황: ${contextText}\n위 내용을 바탕으로 교육활동에 도움이 되는 구체적이고 전문적인 조언을 작성해줘.`,
+                        mode: "education_helper"
+                    })
+                });
+
+                if (response.status === 429) {
+                    contentArea.innerHTML = "<span class='error-msg'>API 일일 사용량이 초과되었습니다. 연구를 위해 잠시 후 다시 시도해 주십시오.</span>";
+                    return;
+                }
+
+                if (!response.ok) throw new Error("서버 응답 오류");
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                contentArea.innerHTML = "";
+
+                while (true) {
+                    const {done, value} = await reader.read();
+                    if (done) break;
+                    contentArea.innerHTML += decoder.decode(value);
+                }
+            } catch (e) {
+                contentArea.innerHTML = "<span class='error-msg'>서버 연결이 원활하지 않습니다. 백엔드 시스템 상태를 다시 점검해 주십시오.</span>";
+            }
+        }
+    </script>
+</body>
+</html>
